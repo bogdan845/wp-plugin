@@ -1,0 +1,13 @@
+.qrep {
+    position: relative;
+
+    &:before {
+        content: "\201E";
+        line-height: 1;
+    }
+
+    &:after {
+        content: "\201D ";
+        line-height: 1;
+    }
+}
