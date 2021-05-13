@@ -8,17 +8,19 @@
 
 add_filter('show_admin_bar', '__return_false');
 
-function styles_scripts_enqueue_assets()
-{
-    wp_enqueue_script('index', plugins_url('/dist/main.js', __FILE__), array(), null, true);
-    wp_localize_script('index', 'example', array(
+// fires inside gutenberg editor
+add_action('enqueue_block_editor_assets', function () {
+    wp_enqueue_style('main', plugins_url('/dist/main.css', __FILE__), array(), null, true);
+    wp_enqueue_script('main', plugins_url('/dist/main.js', __FILE__), array(), null, true);
+    wp_localize_script('main', 'example', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'is_user_logged_in' => is_user_logged_in()
     ));
-}
+});
 
 
-add_action('acf/init', function () {
+
+/*add_action('acf/init', function () {
     if (function_exists('acf_add_local_field_group')):
         acf_add_local_field_group(array(
             'key' => 'group_5c18f89ca825f',
@@ -79,7 +81,7 @@ add_action('acf/init', function () {
             'description' => '',
         ));
     endif;
-});
+});*/
 
 
 // Theme options
@@ -95,43 +97,134 @@ if (function_exists('acf_add_options_page')) {
 
 
 add_action('wp_ajax_ads_ajax', 'ads_ajax');
-add_action('wp_ajax_nopriv_ads_ajax', 'ads_ajax');
-function ads_ajax()
+/*function ads_ajax()
 {
     $post_url = $_POST['post_url'];
     $post_id = parse_url($post_url);
     parse_str($post_id['query'], $query);
     $ads = $_POST['ads'];
 
-
-    $currentAdsList = get_field('ads_list', 'options');
-
     //1
-    $option = get_option('global_ads_list', []);
-
+    $option = get_option('common_ads_list', []);
     //2
     $filter = array_filter($option, function ($item) use ($query) {
         return intval($item['postId']) !== intval($query['post']);
     });
-
     //3
     array_push($filter, [
         'postId' => $query['post'],
         'postState' => $ads,
     ]);
-
     //4
-    update_option('global_ads_list', $filter);
+    update_option('common_ads_list', $filter);
 
-//    echo $query['post'];
-//    var_dump($ads);
-
-    var_dump($filter);
+//    var_dump($filter);
     die();
+}*/
+
+//update_option('common_ads_list', []);
+//update_option('common_ads_state', []);
+
+
+/*add_filter('the_content', function ($content) {
+    if (is_single()) {
+        $target = '/startZ0t_QmRHEO7G_JJUgQJcIJ(.*?)endZ0t_QmRHEO7G_JJUgQJcIJ/s';
+        $options = get_option('common_ads_list');
+        preg_match_all($target, $content, $match);
+
+        $valuesToArr = array_map(function ($item) {
+            return json_decode($item, true);
+        }, $match[1]);
+
+        echo '<pre>';
+        var_dump($valuesToArr);
+        echo '</pre>';
+
+    }
+    return $content;
+});*/
+
+
+remove_filter('the_content', 'wptexturize');
+
+
+$ref = [
+    [
+        'postId' => 14,
+        'postState' => [
+            [
+                'desktop' => 'tag 1',
+                'tablet' => 'tag 2',
+                'mobile' => 'tag 3',
+            ],
+            [
+                'desktop' => 'tag 11',
+                'tablet' => 'tag 22',
+                'mobile' => 'tag 33',
+            ]
+        ],
+    ],
+    [
+        'postId' => 140,
+        'postState' => [
+            [
+                'index' => 1,
+                'blockState' => [
+                    'desktop' => 'script desk',
+                    'tablet' => 'script tablet',
+                    'mobile' => 'script mobile',
+                ]
+            ],
+            [
+                'index' => 2,
+                'blockState' => [
+                    [
+                        'desktop' => 'tag',
+                        'tablet' => 'news',
+                        'mobile' => 'sport',
+                    ]
+                ]
+            ],
+        ],
+    ],
+];
+
+//update_option('global_ads_list', $ref);
+
+
+$merge = [
+    'desk' => [
+        'tag' => ' < script></script > ',
+        'news' => '',
+        'sport' => '',
+    ],
+    'tablet' => [],
+    'mobile' => [],
+];
+
+
+function filterList()
+{
+    $option = get_option('common_ads_state', []);
+    echo ' < pre>';
+    var_dump($option);
+    echo ' </pre > ';
+    $devices = [];
+    foreach ($option as $item) {
+        foreach ($item['postState'] as $subItem) {
+            foreach ($subItem as $key => $target) {
+                if (!in_array($key, $devices)) {
+                    $devices[$key] = [];
+                }
+            }
+        }
+    }
+    echo ' < pre>';
+    var_dump($devices);
+    echo ' </pre > ';
 }
 
-add_action('enqueue_block_editor_assets', 'styles_scripts_enqueue_assets');
-remove_filter('the_content', 'wptexturize');
+//filterList();
 
 
 //$option = get_option('global_ads_list', []);
@@ -248,8 +341,8 @@ remove_filter('the_content', 'wptexturize');
 //                array(
 //                    array(
 //                        'param' => 'options_page',
-//                        'operator' => '==',
-//                        'value' => 'theme-general-settings',
+//                        'operator' => ' == ',
+//                        'value' => 'theme - general - settings',
 //                    ),
 //                ),
 //            ),
@@ -266,90 +359,18 @@ remove_filter('the_content', 'wptexturize');
 //    endif;
 //}
 
-//add_action('acf/init', 'my_acf_add_local_field_groups');
+//add_action('acf / init', 'my_acf_add_local_field_groups');
 
 
 //$test = get_field('ads_list', 'option');
 //
-//echo '<pre>';
+//echo ' < pre>';
 //var_dump($test);
-//echo '</pre>';
+//echo ' </pre > ';
 
-
-$ref = [
-    [
-        'postId' => 14,
-        'postState' => [
-            [
-                'desktop' => 'tag',
-                'tablet' => 'tag',
-                'mobile' => 'tag',
-            ],
-            [
-                'desktop' => 'tag',
-                'tablet' => 'tag',
-                'mobile' => 'tag',
-            ]
-        ],
-    ],
-    [
-        'postId' => 140,
-        'postState' => [
-            [
-                'index' => 1,
-                'blockState' => [
-                    'desktop' => 'tag',
-                    'tablet' => 'tag',
-                    'mobile' => 'tag',
-                ]
-            ],
-            [
-                'index' => 1,
-                'blockState' => [
-                    [
-                        'desktop' => 'tag',
-                        'tablet' => 'news',
-                        'mobile' => 'sport',
-                    ]
-                ]
-            ],
-        ],
-    ],
-];
-
-update_option('global_ads_list', $ref);
-
-
-$merge = [
-    'desk' => [
-        'tag' => '<script></script>',
-        'news' => '',
-        'sport' => '',
-    ],
-    'tablet' => [],
-    'mobile' => [],
-];
-
-
-function filterList()
-{
-
-    $option = get_option('global_ads_list', []);
-    $devices = [];
-    foreach ($option as $key => $item) {
-        foreach ($item['postState'][$key] as $sub) {
-            echo '<pre>';
-            var_dump($sub);
-            echo '</pre>';
-        };
-    }
-}
-
-//filterList();
-
-//echo '<pre>';
+//echo '<pre > ';
 //var_dump(get_option('global_ads_list', []));
-//echo '</pre>';
+//echo ' </pre > ';
 
 
 //
@@ -440,8 +461,8 @@ function filterList()
 //        array(
 //            array(
 //                'param' => 'options_page',
-//                'operator' => '==',
-//                'value' => 'theme-general-settings'
+//                'operator' => ' == ',
+//                'value' => 'theme - general - settings'
 //            ),
 //        ),
 //    ),

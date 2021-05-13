@@ -1,22 +1,4 @@
 import '../sass/main.scss'
-
-
-/*
-.qrep {
-    position: relative;
-
-&:before {
-        content: "\201E";
-        line-height: 1;
-    }
-
-&:after {
-        content: "\201D ";
-        line-height: 1;
-    }
-}
-*/
-
 const {wp} = window;
 const {registerFormatType, toggleFormat} = wp.richText;
 const {RichTextToolbarButton, RichTextShortcut} = wp.editor;

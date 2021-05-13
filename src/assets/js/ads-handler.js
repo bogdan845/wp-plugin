@@ -52,29 +52,13 @@ wp.blocks.registerBlockType('ads-handler/ads', {
     },
 
     edit: function (props) {
-
-        // whileSavingPost(() => {
-        //     jQuery
-        //         .post(example.ajax_url, {
-        //             action: "ads_ajax",
-        //             post_url: window.location.href,
-        //             mobile: props.attributes.mobile,
-        //             tablet,
-        //             desktop
-        // })
-        // .success((response) => {
-        //         console.log(response);
-        //     }
-        // );
-        // });
-
         function onChange(event, device) {
             return props.setAttributes({[device]: event.target.value});
         }
 
         return el('div',
             {
-                className: 'notice-box notice-' + props.attributes.type
+                className: 'ads-handler-block'
             },
             ['desktop', 'tablet', 'mobile'].map(device => {
                 return el(
@@ -84,7 +68,7 @@ wp.blocks.registerBlockType('ads-handler/ads', {
                         placeholder: 'Enter tag here',
                         value: props.attributes[device],
                         onChange: (event) => onChange(event, device),
-                        style: {width: '33%'}
+                        style: {width: '33%'},
                     }
                 )
             })
@@ -103,13 +87,13 @@ wp.blocks.registerBlockType('ads-handler/ads', {
         };
 
         return el('div', {
-                className: 'notice-box notice-' + props.attributes.type,
+                className: 'ads-handler-block',
             },
             ['desktop', 'tablet', 'mobile'].map(device => {
                 return el(
                     'div',
-                    null,
-                    parseReplacer(device)
+                    {className: device + '-ads-handler'},
+                    parseReplacer(device),
                 )
             })
         )
